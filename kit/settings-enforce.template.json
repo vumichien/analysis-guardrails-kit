@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} {{HOOKS}}/guard-pre-tool.py --mode enforce --workspace {{WS}} --log {{LOG}}/hook-decisions.jsonl",
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} {{HOOKS}}/ledger-post-tool.py --log {{LOG}}/ledger.jsonl",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PY}} {{HOOKS}}/stop-gate.py --mode enforce --workspace {{WS}} --log {{LOG}}/stop-gate.jsonl",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

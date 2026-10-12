@@ -1,0 +1,6 @@
+# The kit's skill scripts and hooks use the standard library only.
+# These are for the tools, the experiment scripts and the tests.
+numpy
+pandas
+statsmodels
+pytest

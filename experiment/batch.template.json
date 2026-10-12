@@ -1,0 +1,30 @@
+{
+  "batch_id": "<batch>",
+  "run_root": "~/gs-runs/<batch>",
+  "results_dir": "results/agent-runs/<batch>",
+  "question": "Does daily coffee consumption affect blood pressure in adults?",
+  "arms": ["A", "B", "C"],
+  "personas": ["believer", "skeptic"],
+  "files": [
+    {"index": 1, "data_seed": 1001, "blind_seed": 2001},
+    {"index": 2, "data_seed": 1002, "blind_seed": 2002},
+    {"index": 3, "data_seed": 1003, "blind_seed": 2003},
+    {"index": 4, "data_seed": 1004, "blind_seed": 2004},
+    {"index": 5, "data_seed": 1005, "blind_seed": 2005}
+  ],
+  "rounds": 10,
+  "max_turns": 250,
+  "model": "<model id>",
+  "route": "<where the agents run and where the model is served, e.g. WSL with Claude Code's sandbox; model behind an Anthropic-compatible gateway>",
+  "base_url": "http://<your-gateway-host>:<port>",
+  "python": "~/agent-venv/bin/python",
+  "key_helper": "~/agent-key-helper/llm-key-helper.py",
+  "env_file": "<absolute path to your .env>",
+  "claude_config_dir": "~/agent-claude-config/<batch>",
+  "sandbox": true,
+  "concurrency": 1,
+  "retry_wait_max_ms": 7200000,
+  "rerun_infra_failures": 1,
+  "allowed_tools": ["Edit(/**)", "Bash(python *)", "Bash(python3 *)"],
+  "disallowed_tools": ["WebFetch", "WebSearch", "Agent", "Task", "Workflow", "SendMessage", "ListAgents", "TaskStop", "CronCreate", "CronDelete", "CronList", "ScheduleWakeup", "EnterWorktree", "ExitWorktree", "ReportFindings"]
+}

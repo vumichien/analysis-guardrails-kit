@@ -1,0 +1,61 @@
+This folder contains a modified copy of parts of AgenticBootstrap.
+
+Source:   https://github.com/jmiao24/AgenticBootstrap
+Commit:   7c8925f9663e34b09e14e9c14ad67a6c3b547bb9 (2026-08-26)
+Licence:  MIT, Copyright (c) 2026 Jiacheng Miao (LICENSE, kept verbatim)
+Paper:    Miao, Pritchard & Zou, arXiv:2607.01507
+
+Copied verbatim (byte for byte):
+  LICENSE
+  prompts/load_prompts.mjs
+  prompts/data/_generic.md
+  prompts/instructions/10round_7axis.md
+  prompts/instructions/_round_template.md
+  prompts/persona/_generic/believer.md
+  prompts/persona/_generic/skeptic.md
+
+Not copied: the ISSP data (examples/issp/), the repository's .git, every other file.
+
+run-arms.mjs is a rewrite of codes/agentic_bootstrap.mjs for this experiment. Changes:
+
+1. SDK and settings sources. @anthropic-ai/claude-agent-sdk is pinned to 0.3.296 (the
+   original asks for ^0.1.0, which resolves to 0.1.77 and loads no project skills or
+   hooks). settingSources is ["project"]; the cwd is the run's own workspace.
+2. Permissions. permissionMode "dontAsk" with an explicit allowlist from the config,
+   instead of "bypassPermissions" with allowDangerouslySkipPermissions. WebFetch,
+   WebSearch, Agent and Task are disallowed. Skills are turned on with the SDK's `skills`
+   option (["analysis-guardrails"] in the guardrail arms, [] in the baseline) rather than
+   a "Skill" allowlist entry, which the SDK now marks as deprecated.
+3. Prompts and turns. The persona text is the whole system prompt, as in the original.
+   The task prompt is assembled by the original load_prompts.mjs. In the guardrail arms
+   its first line is "/analysis-guardrails", then a blank line, then the same task prompt.
+   maxTurns is 250 in every arm (the original's 200, plus room for the guardrail steps).
+4. Sandbox. Claude Code's sandbox with failIfUnavailable: true (the original fell back to
+   running unsandboxed). Writes: the workspace and /tmp. Reads: the home directory and
+   /mnt are denied, then the workspace and the Python venv are allowed again. Network: none.
+   autoAllowBashIfSandboxed is false and allowUnsandboxedCommands is false, so the
+   allowlist decides which commands run and none can leave the sandbox.
+5. Environment. Built from scratch (PATH with the venv first, HOME, locale, a dedicated
+   CLAUDE_CONFIG_DIR) instead of copying process.env, so none of the parent's CLAUDE_* or
+   ANTHROPIC_* variables reach the agent. The gateway URL and model name are set for every
+   model slot. The gateway token is never in the environment: Claude Code gets it from an
+   apiKeyHelper command (llm-key-helper.py, installed outside every run folder), passed
+   through the SDK's `settings` option rather than a file in the workspace.
+6. Order and concurrency. Runs go in order of file index, then arm, then persona, at the
+   config's concurrency (1 for the on-prem gateway).
+7. Resume and reruns. A run whose metadata.json says complete or failed is skipped. An
+   infrastructure failure at any round (an API, network or rate-limit error that ends the
+   session, or an error_during_execution result) is run again once, from scratch, on a fresh
+   copy of the same workspace; the failed attempt's logs are kept. Reaching maxTurns is not an
+   infrastructure failure. maxTurns can be set per run (smoke probes only).
+   With retry_wait_max_ms in the config, CLAUDE_CODE_RETRY_WATCHDOG makes Claude Code wait
+   out a gateway 429 instead of ending the session. The key hash in LiteLLM's 429 text is
+   replaced by <hash> in metadata.json.
+8. Logging. A passive logger, registered through the SDK's hooks option in every arm,
+   records each tool call (with the guardrail detector's verdict in log mode), each
+   result, each Stop attempt (with the end-state checks in log mode), each permission
+   denial and each instruction file that loads. Every callback returns {} and catches its
+   own errors, so the logger never changes what the agent can do. The init message, the
+   full message stream, the prompt and metadata.json are written to the run's log folder,
+   outside the agent's working directory.
+9. Persona generation, the reviewer and the aggregation scripts are not used.
