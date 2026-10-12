@@ -81,7 +81,7 @@ Whichever option you pick, check that the skill actually loads. The original Age
 
 ## The sandbox
 
-Claude Code's OS sandbox exists on Linux and WSL. On plain Windows there isn't one: the agent's Python can read whatever your account can read. If you run agents on Windows, run them in WSL, or treat everything your account can reach as visible to them. `run-arms.mjs` asks for the sandbox with `failIfUnavailable: true`, so it refuses to start rather than quietly running without it.
+Claude Code's OS sandbox runs on macOS, Linux and WSL2. On plain Windows there isn't one: the agent's Python can read whatever your account can read. If you run agents on Windows, run them in WSL, or treat everything your account can reach as visible to them. `run-arms.mjs` asks for the sandbox with `failIfUnavailable: true`, so it refuses to start rather than quietly running without it.
 
 ## Run the tests
 
